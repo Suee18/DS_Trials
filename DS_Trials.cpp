@@ -3,24 +3,39 @@
 #include <string>
 using namespace std;
 
-class Account {
-public:
-    int accountNumber;
-    int pin;
-    string account_holder_name;
-    double balance;
-    Account* next;
-
-    void display() {
-        cout << "Account number: [" << accountNumber << "]\n";
-        cout << "Account holder name: [" << account_holder_name << "]\n";
-        cout << "Balance: [" << balance << "]\n";
-    }
-
-};
-
 class Bank {
-public:
+    public:
+    class Account {
+        protected:
+        int pin; /*keep it int*/
+
+         public:
+        unsigned short accountNumber=0;
+        string account_holder_name;
+        double balance=0;
+        Account* next;
+        
+         int getPin() {
+             return pin;
+         }
+         void setPin(int accPin) {
+             pin = accPin;
+         }
+
+      /*  void display() {
+            cout << "Account number: [" << accountNumber << "]\n";
+            cout << "Account holder name: [" << account_holder_name << "]\n";
+            cout << "Balance: [" << balance << "]\n";
+        }*/
+
+    };
+
+
+
+    /*BANK CLASS*/
+
+
+
     Account* head;
     /*Constructor*/
     Bank() {
@@ -28,17 +43,19 @@ public:
     }
 
 
-    void add_account( string account_holder_name, double balance,int pin) {
-        Account* new_account = new Account(); /*new node?*/
-        /*Account number generation*/
-        new_account->accountNumber = rand() % 9000000 + 1000000;
+    
+    unsigned short add_account(string account_holder_name, double balance, int pin) {
+        Account* new_account = new Account();
+        new_account->accountNumber = rand() % (65535 - 10000 - 1) + 10000;
         new_account->account_holder_name = account_holder_name;
         new_account->balance = balance;
-        new_account->pin = pin;
+        new_account->setPin(pin);
         new_account->next = head;
         head = new_account;
-        cout << "account created succefully!";
+        cout << "Account created successfully!" << endl;
+        return new_account->accountNumber; /*too keep it in balance display*/
     }
+
 
 
 
@@ -46,7 +63,7 @@ public:
         Account* currentPtr = bank->head;
         while (currentPtr != nullptr) {
             if (currentPtr->account_holder_name == account_holder_name) {
-                if (currentPtr->pin == pin) {
+                if (currentPtr->  getPin() == pin) {
                     return true;
                 }
                 else {
@@ -103,61 +120,106 @@ public:
             current = current->next;
         }
     }
-    void balance_inquiry(int account_number) {
+
+
+
+    Account* findAccount(const string& username, int pin) {
         Account* current = head;
-        while (current != NULL) {
-            if (current->accountNumber == account_number) {
-                cout << "Account holder name: " << current->account_holder_name << endl;
-                cout << "Balance: " << current->balance << endl;
-                return;
+        while (current != nullptr) {
+            if (current->account_holder_name == username && current->getPin() == pin) {
+                return current;
             }
             current = current->next;
         }
+        return nullptr;
     }
+
+
+
+    void BalanceDisplay(Account* account) 
+    {
+        if (account != nullptr)
+        {
+            cout << "Account Holder: " << account->account_holder_name << endl;
+            cout << "Account Number: " << account->accountNumber << endl;
+            cout << "Balance: " << account->balance <<endl;
+        }
+        else  cout << "Account not found" << endl;
+    }
+
 };
 
 int main() {
-    Bank user;
-    short choice1,choice2,count;
+
+    Bank bank1;
+    Bank::Account acc;
+    Bank::Account* loggedInAccount = nullptr;
+
+    unsigned short choice1, choice2, count = 0;
     int pin;
     string userName;
 
+    //creating accounts as data in the bank (inserting)
+    bank1.add_account("Claire", 1000000, 13033);
+    bank1.add_account("Robbison", 65000, 15012);
+    bank1.add_account("Mark", 7230000, 58012);
+     bank1.add_account("Aliah", 15000, 32014);
+     bank1.add_account("Liam", 600000, 20041);
+    bank1.add_account("Zoe", 23000, 61400);
+
+
+
+
+
     cout << "Press\n (1)Sign in.\t(2)Sign up.\n ";
     cin >> choice1;
+
+
     if (choice1 == 1) {
         /*checks for sign in info function make it boolean*/
-        cout << "Enter your name";
-        cin >> userName;
-        cout << "Enter the pin";
-        cin >> pin;
+        while (count < 5) {
+            cout << "Enter your name:";
+            cin >> userName;
+            cout << "\nEnter the pin:";
+            cin >> pin;
+            acc.setPin(pin); // Set the pin
+            int pinn = acc.getPin(); // Get the pin
+            loggedInAccount = bank1.findAccount(userName, pin);
+            count++;
 
-        if (user.loginVerify(&user,userName,pin)==true) 
-        { /*check the pass by reference and the parameter concept!!!!*/
-            /*enters to main menu #2*/ 
-            cout << "Press a number for transactions:\n (1)View balance\n(2)Deposit\n(3)Withdraw\n(4)DeleteAccount\n";
-            cin >> choice2;
+            if (bank1.loginVerify(&bank1, userName, pinn) == true)
+            { /*check the pass by reference and the parameter concept!!!!*/
+                /*enters to main menu #2*/
+                cout << "Press a number for transactions:\n(1)View balance\n(2)Deposit\n(3)Withdraw\n(4)DeleteAccount\n";
+                cin >> choice2;
 
-            if (choice2 == 1) {}
-            else if (choice2 == 2) {}
-            else if (choice2 == 3) {}
-            else if (choice2 == 4) {}
-            else cerr << "Invalid Input";
-            return;
+                if (choice2 == 1) {
+                    bank1.BalanceDisplay(loggedInAccount);
+
+                }
+                else if (choice2 == 2) {}
+                else if (choice2 == 3) {}
+                else if (choice2 == 4) {}
+                else cerr << "Invalid Input";
+                break;
+
+            }
+            cerr << "Invalid username or password. Try again\n"; /*5 times*/
+          
+
         }
-
-
-
-        else cerr << "Invalid username or password.";/*returns to log in n numbers of times*/
-        count++;
-        if (count >5)
-            return;
-        else cerr << "Exceeded number of Logging in mistakes";
+        if (count > 5) {
+            cerr << "Exceeded number of Logging in mistakes";
+            exit(1);
+        }
+       
+ 
     }
 
 
     else if (choice1 == 2) {
         /*call add account fn*/
-      
+      /* (****note that pin shouldn't be less that 7 digits and numbers only****)*/
     }
     else cerr << "Invalid input.";
     /*return to main menu*/
