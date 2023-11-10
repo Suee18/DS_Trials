@@ -4,34 +4,31 @@
 using namespace std;
 
 class Bank {
-    public:
+public:
     class Account {
-        protected:
+    protected:
         int pin; /*keep it int*/
 
-         public:
-        unsigned short accountNumber=0;
+    public:
+        unsigned short accountNumber = 0;
         string account_holder_name;
-        double balance=0;
+        double balance = 0;
         Account* next;
-        
-         int getPin() {
-             return pin;
-         }
-         void setPin(int accPin) {
-             pin = accPin;
-         }
 
-      /*  void display() {
-            cout << "Account number: [" << accountNumber << "]\n";
-            cout << "Account holder name: [" << account_holder_name << "]\n";
-            cout << "Balance: [" << balance << "]\n";
-        }*/
+        int getPin() {
+            return pin;
+        }
+        void setPin(int accPin) {
+            pin = accPin;
+        }
+
+        /*  void display() {
+              cout << "Account number: [" << accountNumber << "]\n";
+              cout << "Account holder name: [" << account_holder_name << "]\n";
+              cout << "Balance: [" << balance << "]\n";
+          }*/
 
     };
-
-
-
     /*BANK CLASS*/
 
 
@@ -43,10 +40,15 @@ class Bank {
     }
 
 
-    
+    //return type void!  (create a new function to be in balance display).
     unsigned short add_account(string account_holder_name, double balance, int pin) {
         Account* new_account = new Account();
-        new_account->accountNumber = rand() % (65535 - 10000 - 1) + 10000;
+        unsigned short accnum;
+        //generat new random number (to avoid repetition)
+        while (!AccNumSearch()) {
+            accnum = rand() % (65535 - 10000 - 1) + 10000;
+        }
+        new_account->accountNumber = accnum;
         new_account->account_holder_name = account_holder_name;
         new_account->balance = balance;
         new_account->setPin(pin);
@@ -63,7 +65,7 @@ class Bank {
         Account* currentPtr = bank->head;
         while (currentPtr != nullptr) {
             if (currentPtr->account_holder_name == account_holder_name) {
-                if (currentPtr->  getPin() == pin) {
+                if (currentPtr->getPin() == pin) {
                     return true;
                 }
                 else {
@@ -133,16 +135,26 @@ class Bank {
         }
         return nullptr;
     }
+    //search for a an account numbers in the list to avoid repetition
+    bool AccNumSearch() {
+        unsigned short accountNumber;
+        accountNumber = rand() % (65535 - 10000 - 1) + 10000;
+        Account* current = head;
+        while (current != NULL) {
+            if (current->accountNumber == accountNumber)
+                return true;
+            current = current->next;
+        }
+        return false;
+    }
 
-
-
-    void BalanceDisplay(Account* account) 
+    void BalanceDisplay(Account* account)
     {
         if (account != nullptr)
         {
             cout << "Account Holder: " << account->account_holder_name << endl;
             cout << "Account Number: " << account->accountNumber << endl;
-            cout << "Balance: " << account->balance <<endl;
+            cout << "Balance: " << account->balance << endl;
         }
         else  cout << "Account not found" << endl;
     }
@@ -163,8 +175,8 @@ int main() {
     bank1.add_account("Claire", 1000000, 13033);
     bank1.add_account("Robbison", 65000, 15012);
     bank1.add_account("Mark", 7230000, 58012);
-     bank1.add_account("Aliah", 15000, 32014);
-     bank1.add_account("Liam", 600000, 20041);
+    bank1.add_account("Aliah", 15000, 32014);
+    bank1.add_account("Liam", 600000, 20041);
     bank1.add_account("Zoe", 23000, 61400);
 
 
@@ -205,15 +217,15 @@ int main() {
 
             }
             cerr << "Invalid username or password. Try again\n"; /*5 times*/
-          
+
 
         }
         if (count > 5) {
             cerr << "Exceeded number of Logging in mistakes";
             exit(1);
         }
-       
- 
+
+
     }
 
 
@@ -223,7 +235,7 @@ int main() {
     }
     else cerr << "Invalid input.";
     /*return to main menu*/
-    
+
 
 
 
