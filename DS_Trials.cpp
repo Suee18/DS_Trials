@@ -10,15 +10,16 @@ public:
         int pin; /*keep it int*/
 
     public:
+        Account(){}
         unsigned short accountNumber = 0;
         string account_holder_name;
         double balance = 0;
         Account* next;
-
+        //return the pin   //tested
         int getPin() {
             return pin;
-        }//tested
-        int getBalance() {
+        }
+        double getBalance() {
             return balance;
         }
         void setPin(int accPin) {
@@ -34,7 +35,7 @@ public:
     };
     /*BANK CLASS*/
 
-
+    unsigned short count = 0;
 
     Account* head;
     /*Constructor*/
@@ -42,11 +43,30 @@ public:
         head = NULL;
     }
 
+    //return number of accounts
+    unsigned short AccountsNum() {
+        return count;
+    }
 
-     
-    unsigned short add_account(string account_holder_name, double balance, int pin) {
+    //insert the new account in the list //tested
+    void Insertnode(Account* newnode) {
+        if (head == NULL) {
+            head = newnode;
+            cout << "awel wahda" << endl;
+            return;
+        }
+        Account* ptr = head;
+        while (ptr->next != NULL) {
+            ptr = ptr->next;
+        }
+        ptr->next = newnode;
+        newnode->next = NULL;
+        cout << "inserted tamam" << endl;
+    }
+    //tested
+   void add_account(string account_holder_name, double balance, int pin) {
         Account* new_account = new Account();
-        unsigned short accnum=0;
+        unsigned short accnum = rand() % (65535 - 10000 - 1) + 10000;;
         //generat new random number (to avoid repetition)
         while (AccNumSearch(accnum)) {
             accnum = rand() % (65535 - 10000 - 1) + 10000;
@@ -55,10 +75,10 @@ public:
         new_account->account_holder_name = account_holder_name;
         new_account->balance = balance;
         new_account->setPin(pin);
-        new_account->next = head;
-        head = new_account;
+        Insertnode(new_account);
+        count++;//increamenting number of accounts
         cout << "Account created successfully!" << endl;
-        return new_account->accountNumber; /*too keep it in balance display*/
+        cout << "Account number:" << accnum<<endl;
     }//tested
 
 
@@ -81,7 +101,7 @@ public:
     }
 
 
-
+    //need to be tested
     void delete_account(int account_number) {
         Account* current = head;
         Account* previous = NULL;
@@ -99,6 +119,7 @@ public:
             previous = current;
             current = current->next;
         }
+        count--;
     }
     void deposit(int account_number, double amount) {
         Account* current = head;
@@ -199,15 +220,15 @@ int main() {
     //A varaiable == addaccount, as it returns the acc number!!!!>>>>
     Bank bank1;
     Bank::Account acc;
-    Bank::Account* loggedInAccount = nullptr;
-
+    bank1.add_account("mohamed ashraf", 300.5, 43256);
+    bank1.add_account("modofhwei", 30045, 43266);
     unsigned short choice1, choice2, count = 0;
     int pin;
     double amount;
     string userName;
 
     //creating accounts as data in the bank (inserting)
-    unsigned short acc1= bank1.add_account("Claire", 1000000, 13033);
+   // unsigned short acc1 = bank1.add_account("Claire", 1000000, 13033);//?
     bank1.add_account("Robbison", 65000, 15012);
     bank1.add_account("Mark", 7230000, 58012);
     bank1.add_account("Aliah", 15000, 32014);
@@ -247,11 +268,11 @@ int main() {
                     double balance;
                     cout << "Enter the amount";
                     cin >> amount;
-                   balance= acc.getBalance();
-                   unsigned short accN = bank1.findAccount(userName, pin);
-                   bank1.deposit(accN, amount);
-                   cout << "Updated data after the transaction:\n";
-                   bank1.BalanceDisplay(userName);
+                    balance = acc.getBalance();
+                    unsigned short accN = bank1.findAccount(userName, pin);
+                    bank1.deposit(accN, amount);
+                    cout << "Updated data after the transaction:\n";
+                    bank1.BalanceDisplay(userName);
 
                 }
                 else if (choice2 == 3) {
@@ -288,14 +309,6 @@ int main() {
     }
     else cerr << "Invalid input.";
     /*return to main menu*/
-
-
-
-
-
-
-
-
 
 
 
