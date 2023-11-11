@@ -17,10 +17,13 @@ public:
 
         int getPin() {
             return pin;
+        }//tested
+        int getBalance() {
+            return balance;
         }
         void setPin(int accPin) {
             pin = accPin;
-        }
+        }//tested
 
         /*  void display() {
               cout << "Account number: [" << accountNumber << "]\n";
@@ -40,12 +43,12 @@ public:
     }
 
 
-    //return type void!  (create a new function to be in balance display).
+     
     unsigned short add_account(string account_holder_name, double balance, int pin) {
         Account* new_account = new Account();
-        unsigned short accnum;
+        unsigned short accnum=0;
         //generat new random number (to avoid repetition)
-        while (!AccNumSearch()) {
+        while (AccNumSearch(accnum)) {
             accnum = rand() % (65535 - 10000 - 1) + 10000;
         }
         new_account->accountNumber = accnum;
@@ -56,7 +59,7 @@ public:
         head = new_account;
         cout << "Account created successfully!" << endl;
         return new_account->accountNumber; /*too keep it in balance display*/
-    }
+    }//tested
 
 
 
@@ -106,7 +109,7 @@ public:
             }
             current = current->next;
         }
-    }
+    }//tested 
     void withdraw(int account_number, double amount) {
         Account* current = head;
         while (current != NULL) {
@@ -123,56 +126,88 @@ public:
         }
     }
 
-
-
-    Account* findAccount(const string& username, int pin) {
+    unsigned short findAccount(const string& username, int pin) {
         Account* current = head;
         while (current != nullptr) {
             if (current->account_holder_name == username && current->getPin() == pin) {
-                return current;
+                return current->accountNumber;
             }
             current = current->next;
         }
-        return nullptr;
+        return 0;  // Return 0 if account is not found (assuming 0 is not a valid account number)
     }
-    //search for a an account numbers in the list to avoid repetition
-    bool AccNumSearch() {
-        unsigned short accountNumber;
-        accountNumber = rand() % (65535 - 10000 - 1) + 10000;
+
+
+    //Account* findAccount(const string& username, int pin) {
+    //    Account* current = head;
+    //    while (current != nullptr) {
+    //        if (current->account_holder_name == username && current->getPin() == pin) {
+    //            return current;
+    //        }
+    //        current = current->next;
+    //    }
+    //    return nullptr;
+    //}
+
+    /*Search for account number not to be repeated*/
+    bool AccNumSearch(unsigned short accountNumber) {
         Account* current = head;
-        while (current != NULL) {
+        while (current != nullptr) {
             if (current->accountNumber == accountNumber)
                 return true;
             current = current->next;
         }
         return false;
-    }
+    }//tested
 
-    void BalanceDisplay(Account* account)
+
+    void BalanceDisplay(const string& account_holder_name)
     {
-        if (account != nullptr)
+        Account* current = head;
+
+        while (current != nullptr)
         {
-            cout << "Account Holder: " << account->account_holder_name << endl;
-            cout << "Account Number: " << account->accountNumber << endl;
-            cout << "Balance: " << account->balance << endl;
+            if (current->account_holder_name == account_holder_name)
+            {
+                cout << "Account Holder: " << current->account_holder_name << endl;
+                cout << "Account Number: " << current->accountNumber << endl;
+                cout << "Balance: " << current->balance << endl;
+                return;  // Exit the function once the account is found and displayed
+            }
+
+            current = current->next;
         }
-        else  cout << "Account not found" << endl;
-    }
+
+        cout << "Account not found" << endl;
+    }//tested
+
+
+    //void BalanceDisplay(Account* account)
+    //{
+    //    if (account != nullptr)
+    //    {
+    //        cout << "Account Holder: " << account->account_holder_name << endl;
+    //        cout << "Account Number: " << account->accountNumber << endl;
+    //        cout << "Balance: " << account->balance << endl;
+    //    }
+    //    else  cout << "Account not found" << endl;
+    //}
 
 };
 
 int main() {
-
+    //A varaiable == addaccount, as it returns the acc number!!!!>>>>
     Bank bank1;
     Bank::Account acc;
     Bank::Account* loggedInAccount = nullptr;
 
     unsigned short choice1, choice2, count = 0;
     int pin;
+    double amount;
     string userName;
 
     //creating accounts as data in the bank (inserting)
-    bank1.add_account("Claire", 1000000, 13033);
+    unsigned short acc1= bank1.add_account("Claire", 1000000, 13033);
     bank1.add_account("Robbison", 65000, 15012);
     bank1.add_account("Mark", 7230000, 58012);
     bank1.add_account("Aliah", 15000, 32014);
@@ -196,7 +231,7 @@ int main() {
             cin >> pin;
             acc.setPin(pin); // Set the pin
             int pinn = acc.getPin(); // Get the pin
-            loggedInAccount = bank1.findAccount(userName, pin);
+            /*loggedInAccount = bank1.findAccount(userName, pin);*/
             count++;
 
             if (bank1.loginVerify(&bank1, userName, pinn) == true)
@@ -205,12 +240,30 @@ int main() {
                 cout << "Press a number for transactions:\n(1)View balance\n(2)Deposit\n(3)Withdraw\n(4)DeleteAccount\n";
                 cin >> choice2;
 
-                if (choice2 == 1) {
-                    bank1.BalanceDisplay(loggedInAccount);
+                if (choice2 == 1) {//done
+                    bank1.BalanceDisplay(userName);
+                }
+                else if (choice2 == 2) {//done
+                    double balance;
+                    cout << "Enter the amount";
+                    cin >> amount;
+                   balance= acc.getBalance();
+                   unsigned short accN = bank1.findAccount(userName, pin);
+                   bank1.deposit(accN, amount);
+                   cout << "Updated data after the transaction:\n";
+                   bank1.BalanceDisplay(userName);
 
                 }
-                else if (choice2 == 2) {}
-                else if (choice2 == 3) {}
+                else if (choice2 == 3) {
+                    double balance;
+                    cout << "Enter the amount";
+                    cin >> amount;
+                    balance = acc.getBalance();
+                    unsigned short accN = bank1.findAccount(userName, pin);
+                    bank1.withdraw(accN, amount);
+                    cout << "Updated data after the transaction:\n";
+                    bank1.BalanceDisplay(userName);
+                }
                 else if (choice2 == 4) {}
                 else cerr << "Invalid Input";
                 break;
