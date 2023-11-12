@@ -7,4 +7,9 @@ before you get started and notes
 2) getline in main for the userName string (3ashan law user dakhal full name account already created with more than one name
 3) data into files not instances
 
+**Still missing
+1) sign up redirecting
+2) destructing call
+   
+
   
