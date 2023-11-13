@@ -213,6 +213,64 @@ public:
 
 };
 
+    
+    /*choice1, , count = 0, count2 = 0;*/
+    int pin, pin2;
+    double amount;
+    string userName;
+
+void mainMenu(Bank& bankk,string userName,int pin) {
+    Bank::Account acc;
+    unsigned short choice2;
+    double balance=0;
+
+
+    do
+    {
+        /*enters to bank main menu */
+        cout << "\nPress a number for transactions:\n(1)View account details\n(2)Deposit\n(3)Withdraw\n(4)DeleteAccount\n(5)Quit\n";
+        cin >> choice2;
+
+        /*view account details*/
+        if (choice2 == 1) {//done
+            bankk.BalanceDisplay(userName);
+            cout << "*************************************************";
+        }
+        /*deposit*/
+        else if (choice2 == 2) {//done
+            cout << "Enter the amount: ";
+            cin >> amount;
+            balance = acc.getBalance();
+            unsigned short accN = bankk.findAccount(userName, pin);
+            bankk.deposit(accN, amount);
+            cout << "Updated data after the transaction:\n";
+            bankk.BalanceDisplay(userName);
+            cout << "*************************************************";
+
+        }
+        /*withdraw*/
+        else if (choice2 == 3) {
+            cout << "Enter the amount";
+            cin >> amount;
+            balance = acc.getBalance();
+            unsigned short accN = bankk.findAccount(userName, pin);
+            bankk.withdraw(accN, amount);
+            cout << "Updated data after the transaction:\n";
+            bankk.BalanceDisplay(userName);
+            cout << "*************************************************";
+        }
+        /*delete account*/
+        else if (choice2 == 4) {
+            //delete account   by using implemented functions 
+        }
+        else cerr << "Invalid Input";
+
+
+    } while (choice2 != 5);
+
+    exit(0);
+
+}
 
 //MAIN STARTS HERER
 int main()
@@ -220,7 +278,7 @@ int main()
     //A varaiable = addaccount, as it returns the acc number!!!!>>>>
     Bank bank1;
     Bank::Account acc;
-    unsigned short choice1, choice2, count = 0, count2 = 0;
+    unsigned short choice1, choice2=0, count = 0, count2 = 0;
     int pin, pin2;
     double amount;
     string userName;
@@ -243,9 +301,11 @@ int main()
 
 
     /*LogIn*/
-    if (choice1 == 1) {
+    if (choice1 == 1)
+    {
 
-        while (count < 5) {
+        while (count < 5)
+        {
             /*checking for entered username and pin*/
             cout << "Enter your name:\n";
             cin >> userName;
@@ -258,51 +318,7 @@ int main()
 
             if (bank1.loginVerify(&bank1, userName, pinn) == true)
             {
-
-                do
-                {
-                    /*enters to bank main menu */
-                    cout << "\nPress a number for transactions:\n(1)View account details\n(2)Deposit\n(3)Withdraw\n(4)DeleteAccount\n(5)Quit\n";
-                    cin >> choice2;
-
-                    /*view account details*/
-                    if (choice2 == 1) {//done
-                        bank1.BalanceDisplay(userName);
-                        cout << "*************************************************";
-                    }
-                    /*deposit*/
-                    else if (choice2 == 2) {//done
-                        double balance;
-                        cout << "Enter the amount: ";
-                        cin >> amount;
-                        balance = acc.getBalance();
-                        unsigned short accN = bank1.findAccount(userName, pin);
-                        bank1.deposit(accN, amount);
-                        cout << "Updated data after the transaction:\n";
-                        bank1.BalanceDisplay(userName);
-                        cout << "*************************************************";
-
-                    }
-                    /*withdraw*/
-                    else if (choice2 == 3) {
-                        double balance;
-                        cout << "Enter the amount";
-                        cin >> amount;
-                        balance = acc.getBalance();
-                        unsigned short accN = bank1.findAccount(userName, pin);
-                        bank1.withdraw(accN, amount);
-                        cout << "Updated data after the transaction:\n";
-                        bank1.BalanceDisplay(userName);
-                        cout << "*************************************************";
-                    }
-                    /*delete account*/
-                    else if (choice2 == 4) {
-                        //delete account   by using implemented functions 
-                    }
-                    else cerr << "Invalid Input";
-
-
-                } while (choice2 != 5); break;
+                mainMenu(bank1,userName,pin);
 
             }
             cerr << "Invalid username or password. Try again\n"; /*5 times*/
@@ -320,7 +336,8 @@ int main()
     }
 
     /*SignUp*/
-    else if (choice1 == 2) {
+    else if (choice1 == 2) 
+    {
 
         cout << "Welcome! pleaser enter your name:";
         cin >> userName;
@@ -342,9 +359,9 @@ int main()
 
 
         bank1.addAccount(userName, amount, pin);
-
-
-
+        
+       
+        mainMenu(bank1, userName, pin);
 
 
         /*call add account fn*/
@@ -354,9 +371,9 @@ int main()
 
 
     //reasoning for user when he chosses a number that is not in the main menu 
-    else if (choice1 != 1 || choice2 != 2)
+    else if (choice1 != 1 || choice1 != 2)
     {
-        cerr << "Invalid Input";
+        cerr << "Invalid Input, Quitting";
         exit(1); //to flag invalid choices from the user 
     }
 
