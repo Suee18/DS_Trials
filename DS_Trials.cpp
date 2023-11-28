@@ -1,12 +1,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include<fstream>
 using namespace std;
 
 class Bank
 {
 public:
-    class Account 
+    class Account
     {
     protected:
         int pin; /*keep it int*/
@@ -16,17 +17,17 @@ public:
         string accounOwnerName;
         double balance = 0;
         Account* next;
+        
 
-           
         int getPin()
         {
             return pin;
         }//tested
-        void setPin(int accPin) 
+        void setPin(int accPin)
         {
             pin = accPin;
-        }//tested
-        double getBalance() 
+        }//tested   
+        double getBalance()
         {
             return balance;
         }//tested
@@ -36,10 +37,13 @@ public:
 
     /*BANK CLASS STARTS HERE*/
 
-   //data members
+   //data membersss
     unsigned short count = 0;
     Account* head;
-
+    typedef Account* AccountPointer;
+    AccountPointer first;
+    //AccountPointer ptr;
+    //AccountPointer prev;
     //constructor
     Bank()
     {
@@ -47,7 +51,7 @@ public:
     }
 
     //return number of accounts
-    unsigned short AccountsNum() 
+    unsigned short AccountsNum()
     {
         return count;
     }
@@ -61,11 +65,11 @@ public:
         Account* newAccount = new Account();
         Account* ptr = head; //****enhance here 3 in read me
 
-                 //generate a random acc number
+        //generate a random acc number
         unsigned short accnum = rand() % (65535 - 10000 - 1) + 10000;
 
-          // Generate a new random number (to avoid repetition)
-        while (AccNumSearch(accnum)) 
+        // Generate a new random number (to avoid repetition)
+        while (AccNumSearch(accnum))
         {
             accnum = rand() % (65535 - 10000 - 1) + 10000;
         }
@@ -76,7 +80,7 @@ public:
         newAccount->setPin(pin);
         newAccount->next = NULL;
 
-        if (head == NULL) 
+        if (head == NULL)
         {
             head = newAccount;
             cout << "First account created successfully!" << endl;
@@ -84,8 +88,8 @@ public:
             return;
         }
 
-        
-        while (ptr->next != NULL) 
+
+        while (ptr->next != NULL)
         {
             ptr = ptr->next;
         }
@@ -94,6 +98,7 @@ public:
         count++; // Incrementing number of accounts: our ll size
         cout << "Account created successfully!" << endl;
         cout << "Account number: " << accnum << endl;
+        
     }
 
     /*Search for account number not to be repeated
@@ -120,7 +125,7 @@ public:
                     return false;
                 }
             }
-            currentPtr = currentPtr->next;
+            //currentPtr = currentPtr->next;
         }
         return false;
     }
@@ -146,6 +151,7 @@ public:
             current = current->next;
         }
         count--;
+
     }
 
 
@@ -209,20 +215,53 @@ public:
         cout << "Account not found" << endl;
     }//tested
 
+    void Write_List_into_Files() {
+        fstream bank;
+        bank.open("Bank.txt");
+        AccountPointer ptr= first;
+        while (ptr != NULL) {
+            bank << ptr->accounOwnerName << " " << ptr->accountNumber << " " << ptr->balance<<endl;
+            ptr = ptr->next;
+            string s;
+            getline(bank, s,' ');
+            s = ptr->accounOwnerName;
+            getline(bank, s, ' ');
+            s = ptr->accountNumber;
+            getline(bank, s, ' ');
+            s = ptr->balance;
+        }
+        bank.close();
+    
+    }
+
+    void Read_File_into_List() {
+        fstream bank;
+        bank.open("Bank.txt");
+        first = NULL;
+        AccountPointer ptr=first;
+        string s;
+        while (!bank.eof()) {
+            Account* newNode = new Account();
+            bank >> ptr->accounOwnerName >> s >> ptr->accountNumber >> s >> ptr->balance;
+            ptr = ptr ->next;
+        }
+        bank.close();
+    
+    }
 
 
 };
 
-    
-    /*choice1, , count = 0, count2 = 0;*/
-    int pin, pin2;
-    double amount;
-    string userName;
 
-void mainMenu(Bank& bankk,string userName,int pin) {
+/*choice1, , count = 0, count2 = 0;*/
+int pin, pin2;
+double amount;
+string userName;
+
+void mainMenu(Bank& bankk, string userName, int pin) {
     Bank::Account acc;
     unsigned short choice2;
-    double balance=0;
+    double balance = 0;
 
 
     do
@@ -262,6 +301,10 @@ void mainMenu(Bank& bankk,string userName,int pin) {
         /*delete account*/
         else if (choice2 == 4) {
             //delete account   by using implemented functions 
+            bankk.deleteAccount(acc.accountNumber);
+            if (bankk.findAccount(userName, pin)==0)
+                cout << "Account deleted successfully";
+
         }
         else cerr << "Invalid Input";
 
@@ -275,10 +318,12 @@ void mainMenu(Bank& bankk,string userName,int pin) {
 //MAIN STARTS HERER
 int main()
 {
+   
     //A varaiable = addaccount, as it returns the acc number!!!!>>>>
     Bank bank1;
+    
     Bank::Account acc;
-    unsigned short choice1, choice2=0, count = 0, count2 = 0;
+    unsigned short choice1, choice2 = 0, count = 0, count2 = 0;
     int pin, pin2;
     double amount;
     string userName;
@@ -291,7 +336,7 @@ int main()
     bank1.addAccount("Aliah", 15000, 32014);
     bank1.addAccount("Liam", 600000, 20041);
     bank1.addAccount("Zoe", 23000, 61400);
-
+ bank1. Write_List_into_Files();
 
 
 
@@ -308,20 +353,26 @@ int main()
         {
             /*checking for entered username and pin*/
             cout << "Enter your name:\n";
-            cin >> userName;
+            cin>>userName;
+           // getline(cin,userName);
+            //getline(userName);
+          //  cin >> userName;
             cout << "Enter the pin:";
             cin >> pin;
             acc.setPin(pin);
             int pinn = acc.getPin();
             count++;
 
-
+            
             if (bank1.loginVerify(&bank1, userName, pinn) == true)
             {
-                mainMenu(bank1,userName,pin);
+                mainMenu(bank1, userName, pin);
 
             }
-            cerr << "Invalid username or password. Try again\n"; /*5 times*/
+            
+            else
+                cerr << "Invalid username or password. Try again\n"; /*5 times*/
+            
 
         }
         if (count > 5)
@@ -336,7 +387,7 @@ int main()
     }
 
     /*SignUp*/
-    else if (choice1 == 2) 
+    else if (choice1 == 2)
     {
 
         cout << "Welcome! pleaser enter your name:";
@@ -359,8 +410,8 @@ int main()
 
 
         bank1.addAccount(userName, amount, pin);
-        
-       
+
+
         mainMenu(bank1, userName, pin);
 
 
@@ -376,6 +427,6 @@ int main()
         cerr << "Invalid Input, Quitting";
         exit(1); //to flag invalid choices from the user 
     }
-
+    
     return 0;
 }
