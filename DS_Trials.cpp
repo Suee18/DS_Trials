@@ -39,11 +39,9 @@ public:
 
    //data membersss
     unsigned short count = 0;
-    Account* head;
     typedef Account* AccountPointer;
-    AccountPointer first;
-    //AccountPointer ptr;
-    //AccountPointer prev;
+    AccountPointer head;
+   
     //constructor
     Bank()
     {
@@ -51,6 +49,7 @@ public:
     }
 
     //return number of accounts
+    //Size of the Linked List
     unsigned short AccountsNum()
     {
         return count;
@@ -63,7 +62,7 @@ public:
     void addAccount(string accounOwnerName, double balance, int pin)
     {
         Account* newAccount = new Account();
-        Account* ptr = head; //****enhance here 3 in read me
+        AccountPointer ptr = head; //****enhance here 3 in read me
 
         //generate a random acc number
         unsigned short accnum = rand() % (65535 - 10000 - 1) + 10000;
@@ -104,7 +103,7 @@ public:
     /*Search for account number not to be repeated
     Used in add acc to avoid repition*/
     bool AccNumSearch(unsigned short accountNumber) {
-        Account* current = head;
+        AccountPointer current = head;
         while (current != nullptr) {
             if (current->accountNumber == accountNumber)
                 return true;
@@ -115,7 +114,7 @@ public:
 
 
     bool loginVerify(Bank* bank, string accounOwnerName, int pin) {
-        Account* currentPtr = bank->head;
+        AccountPointer currentPtr = bank->head;
         while (currentPtr != nullptr) {
             if (currentPtr->accounOwnerName == accounOwnerName) {
                 if (currentPtr->getPin() == pin) {
@@ -125,7 +124,7 @@ public:
                     return false;
                 }
             }
-            //currentPtr = currentPtr->next;
+            currentPtr = currentPtr->next;
         }
         return false;
     }
@@ -134,8 +133,25 @@ public:
     //need to be tested (and called in main in choice 4)
     //node: account destructor
     void deleteAccount(int accountNum) {
-        Account* current = head;
-        Account* previous = NULL;
+        AccountPointer current = head;
+        AccountPointer previous = NULL;
+      //Another Approach
+     /*   if (current != NULL && current->accountNumber == accountNum) {
+            head = current->next;
+            delete current;
+            return;
+
+        }
+        while (current != NULL && current->accountNumber != accountNum) {
+            previous = current;
+            current = current->next;
+        }
+        if (current == NULL) return;
+
+        previous->next = current->next;
+        delete current;
+        return;*/
+
         while (current != NULL) {
             if (current->accountNumber == accountNum) {
                 if (previous == NULL) {
@@ -151,13 +167,13 @@ public:
             current = current->next;
         }
         count--;
-
-    }
+        return;
+    }//tested
 
 
     //add money to balance
     void deposit(int accountNum, double amount) {
-        Account* current = head;
+        AccountPointer current = head;
         while (current != NULL) {
             if (current->accountNumber == accountNum) {
                 current->balance += amount;
@@ -169,7 +185,7 @@ public:
 
     //deduct money from balance
     void withdraw(int accountNum, double amount) {
-        Account* current = head;
+        AccountPointer current = head;
         while (current != NULL) {
             if (current->accountNumber == accountNum) {
                 if (current->balance >= amount) {
@@ -185,19 +201,19 @@ public:
     }//tested
 
     unsigned short findAccount(const string& username, int pin) {
-        Account* current = head;
+        AccountPointer current = head;
         while (current != nullptr) {
             if (current->accounOwnerName == username && current->getPin() == pin) {
                 return current->accountNumber;
             }
-            current = current->next;
+            current = current->next;            
         }
         return 0;  // Return 0 if account is not found (assuming 0 is not a valid account number)
     }
 
     void BalanceDisplay(const string& account_holder_name)
     {
-        Account* current = head;
+        AccountPointer current = head;
 
         while (current != nullptr)
         {
@@ -215,39 +231,43 @@ public:
         cout << "Account not found" << endl;
     }//tested
 
-    void Write_List_into_Files() {
-        fstream bank;
-        bank.open("Bank.txt");
-        AccountPointer ptr= first;
+    void Write_List_into_Files(Bank*b) {
+        ofstream bank("Bank.txt");
+        AccountPointer ptr= b->head;
         while (ptr != NULL) {
-            bank << ptr->accounOwnerName << " " << ptr->accountNumber << " " << ptr->balance<<endl;
+            bank << ptr->accounOwnerName <<" " << ptr->accountNumber <<" " << ptr->balance <<" " << ptr->getPin() << endl;
             ptr = ptr->next;
-            string s;
-            getline(bank, s,' ');
-            s = ptr->accounOwnerName;
-            getline(bank, s, ' ');
-            s = ptr->accountNumber;
-            getline(bank, s, ' ');
-            s = ptr->balance;
+            
         }
         bank.close();
     
-    }
+    }//tested               
 
-    void Read_File_into_List() {
-        fstream bank;
-        bank.open("Bank.txt");
-        first = NULL;
-        AccountPointer ptr=first;
-        string s;
-        while (!bank.eof()) {
-            Account* newNode = new Account();
-            bank >> ptr->accounOwnerName >> s >> ptr->accountNumber >> s >> ptr->balance;
-            ptr = ptr ->next;
+    void Read_File_into_List(Bank* b) {
+   
+        ifstream Bank("Bank.txt");
+        b->head = NULL;
+        AccountPointer current = NULL;
+        string name, number, balance, pin;
+        while (Bank >> name >> number >> balance >> pin) {
+            Account* newNode = new Account;
+            newNode->accounOwnerName = name;
+            newNode->accountNumber = std::stoul(number);
+            newNode->balance = std::stod(balance);
+            int p = stoi(pin);
+            newNode->setPin(p);
+            newNode->next = nullptr;
+            if (b->head == nullptr) {
+                b->head = newNode;
+                current = newNode;
+            }
+            else {
+                current->next = newNode;
+                current = newNode;
+            }
         }
-        bank.close();
-    
-    }
+        Bank.close();
+    }//tested
 
 
 };
@@ -301,16 +321,19 @@ void mainMenu(Bank& bankk, string userName, int pin) {
         /*delete account*/
         else if (choice2 == 4) {
             //delete account   by using implemented functions 
-            bankk.deleteAccount(acc.accountNumber);
+            unsigned short accN = bankk.findAccount(userName, pin);
+            bankk.deleteAccount(accN);
             if (bankk.findAccount(userName, pin)==0)
                 cout << "Account deleted successfully";
+           // cout << bankk.findAccount(userName, pin)<<endl;
 
         }
-        else cerr << "Invalid Input";
+        cerr << "Invalid Input";
+
 
 
     } while (choice2 != 5);
-
+    bankk.Write_List_into_Files(&bankk);
     exit(0);
 
 }
@@ -321,22 +344,27 @@ int main()
    
     //A varaiable = addaccount, as it returns the acc number!!!!>>>>
     Bank bank1;
-    
     Bank::Account acc;
+    
+    string s = "123.9";
+    double num = stod(s);
+    cout << num;
+   
     unsigned short choice1, choice2 = 0, count = 0, count2 = 0;
     int pin, pin2;
     double amount;
     string userName;
 
     //creating accounts as data in the bank (inserting)
-    bank1.addAccount("mohamed", 300.5, 43256);
+   /* bank1.addAccount("mohamed", 300.5, 43256);
     bank1.addAccount("modo", 30045, 43266);
     bank1.addAccount("Robbison", 65000, 15012);
     bank1.addAccount("Bataman", 723000000, 101);
     bank1.addAccount("Aliah", 15000, 32014);
     bank1.addAccount("Liam", 600000, 20041);
     bank1.addAccount("Zoe", 23000, 61400);
- bank1. Write_List_into_Files();
+    bank1.Write_List_into_Files(&bank1);*/
+    bank1.Read_File_into_List(&bank1);
 
 
 
@@ -355,8 +383,6 @@ int main()
             cout << "Enter your name:\n";
             cin>>userName;
            // getline(cin,userName);
-            //getline(userName);
-          //  cin >> userName;
             cout << "Enter the pin:";
             cin >> pin;
             acc.setPin(pin);
@@ -369,20 +395,14 @@ int main()
                 mainMenu(bank1, userName, pin);
 
             }
-            
             else
                 cerr << "Invalid username or password. Try again\n"; /*5 times*/
-            
-
         }
         if (count > 5)
         {
             cerr << "Exceeded number of Logging in mistakes";
             exit(1);
         }
-
-
-
 
     }
 
