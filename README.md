@@ -3,13 +3,13 @@ before you get started and notes
 >>>count is the linked list size
 
 **needs to be enhanced:
-1) create a node pointer (account pointer data type as in labs)[[ typedef Node* NodePointer; NodePointer head; NodePointer currentPtr;]]
+1) create a node pointer (account pointer data type as in labs)[[ typedef Node* NodePointer; NodePointer head; NodePointer currentPtr;]] //Done
 2) getline in main for the userName string (3ashan law user dakhal full name account already created with more than one name
-3) data into files not instances
+3) data into files not instances//Done
 
 **Still missing
 1) sign up redirecting
-2) destructing call
+2) destructing call//Done
    
 
   
