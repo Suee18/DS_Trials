@@ -1,0 +1,150 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cryptopp/aes.h>
+#include <cryptopp/modes.h>
+#include <cryptopp/filters.h>
+
+using namespace CryptoPP;
+using namespace std;
+
+class Account {
+public:
+    string accounOwnerName;
+    unsigned long accountNumber;
+    double balance;
+    int pin;
+    Account* next;
+    // Additional Account class members and methods as needed
+
+    // Sample method for setting the PIN
+    void setPin(int newPin) {
+        pin = newPin;
+    }
+};
+
+typedef Account* AccountPointer;
+
+class Bank {
+public:
+    AccountPointer head;
+    // Additional Bank class members and methods as needed
+};
+
+// Function to encrypt a string using AES
+string encryptString(const string& input, const string& key)
+{
+    SecByteBlock keyBytes((const byte*)key.data(), key.size());
+    AES::Encryption aesEncryption(keyBytes, keyBytes.size());
+    CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, (const byte*)key.data());
+
+    string ciphertext;
+    StringSource(input, true,
+        new StreamTransformationFilter(cbcEncryption, new StringSink(ciphertext)));
+
+    return ciphertext;
+}
+
+// Function to decrypt a string using AES
+string decryptString(const string& ciphertext, const string& key)
+{
+    SecByteBlock keyBytes((const byte*)key.data(), key.size());
+    AES::Decryption aesDecryption(keyBytes, keyBytes.size());
+    CBC_Mode_ExternalCipher::Decryption cbcDecryption(aesDecryption, (const byte*)key.data());
+
+    string decryptedtext;
+    StringSource(ciphertext, true,
+        new StreamTransformationFilter(cbcDecryption, new StringSink(decryptedtext)));
+
+    return decryptedtext;
+}
+
+// Function to write encrypted data to a file
+void Write_List_into_Files(Bank* b, const string& encryptionKey) {
+    ofstream bank("Bank.txt");
+
+    AccountPointer ptr = b->head;
+    while (ptr != NULL) {
+        // Encrypt the data before writing to the file
+        string encryptedData = encryptString(ptr->accounOwnerName + " " +
+                                             to_string(ptr->accountNumber) + " " +
+                                             to_string(ptr->balance) + " " +
+                                             to_string(ptr->pin), encryptionKey);
+        bank << encryptedData << endl;
+        ptr = ptr->next;
+    }
+
+    bank.close();
+}
+
+// Function to read and decrypt data from a file
+void Read_File_into_List(Bank* b, const string& encryptionKey) {
+    ifstream Bank("Bank.txt");
+    b->head = NULL;
+    AccountPointer current = NULL;
+
+    string encryptedData;
+    while (getline(Bank, encryptedData)) {
+        // Decrypt the data after reading from the file
+        string decryptedData = decryptString(encryptedData, encryptionKey);
+
+        istringstream iss(decryptedData);
+        string name, number, balance, pin;
+        iss >> name >> number >> balance >> pin;
+
+        Account* newNode = new Account;
+        newNode->accounOwnerName = name;
+        newNode->accountNumber = stoul(number);
+        newNode->balance = stod(balance);
+        newNode->pin = stoi(pin);
+        newNode->next = nullptr;
+
+        if (b->head == nullptr) {
+            b->head = newNode;
+            current = newNode;
+        } else {
+            current->next = newNode;
+            current = newNode;
+        }
+    }
+
+    Bank.close();
+}
+
+int main() {
+    // Replace "your_key" with the actual encryption key you want to use
+    string key = "your_key";
+
+    // Create a Bank object and populate it with some data
+    Bank myBank;
+    Account acc1, acc2;
+    acc1.accounOwnerName = "John Doe";
+    acc1.accountNumber = 123456789;
+    acc1.balance = 1000.0;
+    acc1.pin = 1234;
+
+    acc2.accounOwnerName = "Jane Smith";
+    acc2.accountNumber = 987654321;
+    acc2.balance = 500.0;
+    acc2.pin = 5678;
+
+    myBank.head = &acc1;
+    acc1.next = &acc2;
+    acc2.next = nullptr;
+
+    // Write encrypted data to file
+    Write_List_into_Files(&myBank, key);
+
+    // Read and decrypt data from file
+    Bank readBank;
+    Read_File_into_List(&readBank, key);
+
+    // Display the decrypted data
+    AccountPointer ptr = readBank.head;
+    while (ptr != nullptr) {
+        cout << "Name: " << ptr->accounOwnerName << ", Account Number: " << ptr->accountNumber << ", Balance: " << ptr->balance << ", PIN: " << ptr->pin << endl;
+        ptr = ptr->next;
+    }
+
+    return 0;
+}
