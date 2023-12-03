@@ -231,9 +231,47 @@ public:
         cout << "Account not found" << endl;
     }//tested
 
-    void Write_List_into_Files(Bank*b) {
+    void TransferMoney(unsigned short AccountNum1,unsigned short AccountNum,double Amount ) {
+        AccountPointer ptr= head,ptr1=head;
+        double balance1;
+        while (ptr1 != NULL) {
+            if (ptr1->accountNumber == AccountNum1) {
+                balance1 = ptr1->balance;
+                break;
+            }
+            ptr1 = ptr1->next;
+        }
+
+        
+        while (ptr != NULL)
+        {
+                if (ptr->accountNumber == AccountNum)
+                {
+                    if (Amount <= balance1)
+                    {
+                        withdraw(AccountNum1, Amount);
+                        deposit(AccountNum, Amount);
+                        //ptr->accountNumber += Amount;
+                        //acc->accountNumber -= Amount;
+                        cout << "Money Transfered Successfully" << endl;
+                        return;
+                    }
+                    else if(Amount > balance1) {
+                        cout << "No enough Money to Transfer" << endl;
+                    }
+                }
+            
+            ptr = ptr->next;
+        }
+
+        return;
+    
+    }
+
+    void Write_List_into_Files() {
         ofstream bank("Bank.txt");
-        AccountPointer ptr= b->head;
+        AccountPointer ptr= head;
+
         while (ptr != NULL) {
             bank << ptr->accounOwnerName <<" " << ptr->accountNumber <<" " << ptr->balance <<" " << ptr->getPin() << endl;
             ptr = ptr->next;
@@ -243,10 +281,10 @@ public:
     
     }//tested               
 
-    void Read_File_into_List(Bank* b) {
+    void Read_File_into_List() {
    
         ifstream Bank("Bank.txt");
-        b->head = NULL;
+        head = NULL;
         AccountPointer current = NULL;
         string name, number, balance, pin;
         while (Bank >> name >> number >> balance >> pin) {
@@ -256,9 +294,9 @@ public:
             newNode->balance = std::stod(balance);
             int p = stoi(pin);
             newNode->setPin(p);
-            newNode->next = nullptr;
-            if (b->head == nullptr) {
-                b->head = newNode;
+           // newNode->next = NULL;
+            if (head == NULL) {
+                head = newNode;
                 current = newNode;
             }
             else {
@@ -279,7 +317,7 @@ double amount;
 string userName;
 
 void mainMenu(Bank& bankk, string userName, int pin) {
-    Bank::Account acc;
+    //Bank::Account acc;
     unsigned short choice2;
     double balance = 0;
 
@@ -287,7 +325,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
     do
     {
         /*enters to bank main menu */
-        cout << "\nPress a number for transactions:\n(1)View account details\n(2)Deposit\n(3)Withdraw\n(4)DeleteAccount\n(5)Quit\n";
+        cout << "\nPress a number for transactions:\n(1)View account details\n(2)Deposit\n(3)Withdraw\n(4)DeleteAccount\n (5)TransferMoney\n(6)Quit\n";
         cin >> choice2;
 
         /*view account details*/
@@ -299,7 +337,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
         else if (choice2 == 2) {//done
             cout << "Enter the amount: ";
             cin >> amount;
-            balance = acc.getBalance();
+            //balance = acc.getBalance();
             unsigned short accN = bankk.findAccount(userName, pin);
             bankk.deposit(accN, amount);
             cout << "Updated data after the transaction:\n";
@@ -311,7 +349,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
         else if (choice2 == 3) {
             cout << "Enter the amount";
             cin >> amount;
-            balance = acc.getBalance();
+            //balance = acc.getBalance();
             unsigned short accN = bankk.findAccount(userName, pin);
             bankk.withdraw(accN, amount);
             cout << "Updated data after the transaction:\n";
@@ -328,12 +366,23 @@ void mainMenu(Bank& bankk, string userName, int pin) {
            // cout << bankk.findAccount(userName, pin)<<endl;
 
         }
-        cerr << "Invalid Input";
+        else if (choice2 == 5) {
+
+            cout << "Enter account number you want to transfer" << endl;
+            unsigned short num;
+            cin >> num;
+            cout << "Enter the Amount" << endl;
+            double Amount;
+            cin >> Amount;
+            unsigned short accN = bankk.findAccount(userName, pin);
+            bankk.TransferMoney(accN,num,Amount);
 
 
+        }
+        else  cerr << "Invalid Input";
 
-    } while (choice2 != 5);
-    bankk.Write_List_into_Files(&bankk);
+    } while (choice2 != 6);
+    bankk.Write_List_into_Files();
     exit(0);
 
 }
@@ -346,25 +395,25 @@ int main()
     Bank bank1;
     Bank::Account acc;
     
-    string s = "123.9";
+    /*string s = "123.9";
     double num = stod(s);
     cout << num;
-   
+   */
     unsigned short choice1, choice2 = 0, count = 0, count2 = 0;
     int pin, pin2;
     double amount;
     string userName;
 
     //creating accounts as data in the bank (inserting)
-   /* bank1.addAccount("mohamed", 300.5, 43256);
+   /*bank1.addAccount("mohamed", 300.5, 43256);
     bank1.addAccount("modo", 30045, 43266);
     bank1.addAccount("Robbison", 65000, 15012);
     bank1.addAccount("Bataman", 723000000, 101);
     bank1.addAccount("Aliah", 15000, 32014);
     bank1.addAccount("Liam", 600000, 20041);
-    bank1.addAccount("Zoe", 23000, 61400);
-    bank1.Write_List_into_Files(&bank1);*/
-    bank1.Read_File_into_List(&bank1);
+    bank1.addAccount("Zoe", 23000, 61400);*/
+    //bank1.Write_List_into_Files();
+    bank1.Read_File_into_List();
 
 
 
