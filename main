@@ -3,9 +3,15 @@
 #include <string>
 #include<fstream>
 #include "Bank.h"
-#include "aes.h"
-#include "filters.h"
-#include "modes.h"
+#include "cryptopp/aes.h"
+#include "cryptopp/modes.h"
+#include "cryptopp/filters.h"
+#include "cryptopp/osrng.h"
+#include "cryptopp/hex.h"
+#include "cryptopp/files.h"
+#include <sstream>
+
+using namespace CryptoPP;
 
 using namespace std;
 
@@ -44,7 +50,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
 
         }
         /*withdraw*/
-        else if (choice2 == 3) 
+        else if (choice2 == 3)
         {
             cout << "Enter the amount";
             cin >> amount;
@@ -56,7 +62,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
             cout << "*************************************************";
         }
         /*delete account*/
-        else if (choice2 == 4) 
+        else if (choice2 == 4)
         {
             //delete account   by using implemented functions 
             unsigned short accN = bankk.findAccount(userName, pin);
@@ -67,7 +73,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
 
         }
 
-        else if (choice2 == 5) 
+        else if (choice2 == 5)
         {
 
             cout << "Enter account number you want to transfer" << endl;
@@ -82,9 +88,9 @@ void mainMenu(Bank& bankk, string userName, int pin) {
         else  cerr << "Invalid Input";
 
     } while (choice2 != 6);
-    bankk.Write_List_into_Files();
+    bankk.EncryptAndWriteToFile();
     exit(0);
-      
+
 }
 
 
@@ -105,7 +111,7 @@ int main()
     int pin, pin2;
     double amount;
     string userName;
-    bank1.Read_File_into_List();
+    bank1.ReadFileAndDecrypt();
 
 
 
