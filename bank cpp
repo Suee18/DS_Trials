@@ -4,36 +4,46 @@
 #include <string>
 #include<fstream>
 #include <string>
+#include "cryptopp/aes.h"
+#include "cryptopp/modes.h"
+#include "cryptopp/filters.h"
+#include "cryptopp/files.h"
+#include "cryptopp/osrng.h"
+#include "cryptopp/hex.h"
+#include <sstream>
+
+using namespace CryptoPP;
+
 using namespace std;
 
 int Bank::Account::getPin()
 {
-	return pin;
+    return pin;
 }
 
 
 void Bank::Account::setPin(int accPin)
 {
-	pin = accPin;
+    pin = accPin;
 
 }
 
 double Bank::Account::getBalance()
 {
-	return balance;
+    return balance;
 }
 
 Bank::Bank()
 {
-	head = NULL;
+    head = NULL;
 
 }
 
 //return number of accounts
-	//Size of the Linked List
+    //Size of the Linked List
 unsigned short Bank::AccountsNum()
 {
-	return count;
+    return count;
 }
 
 void Bank::addAccount(string accounOwnerName, double balance, int pin)
@@ -198,24 +208,24 @@ unsigned short Bank::findAccount(const string& username, int pin)
 
 void Bank::BalanceDisplay(const string& account_holder_name)
 {
-    
-        AccountPointer current = head;
 
-        while (current != nullptr)
+    AccountPointer current = head;
+
+    while (current != nullptr)
+    {
+        if (current->accounOwnerName == account_holder_name)
         {
-            if (current->accounOwnerName == account_holder_name)
-            {
-                cout << "Account Holder: " << current->accounOwnerName << endl;
-                cout << "Account Number: " << current->accountNumber << endl;
-                cout << "Balance: " << current->balance << endl;
-                return;  // Exit the function once the account is found and displayed
-            }
-
-            current = current->next;
+            cout << "Account Holder: " << current->accounOwnerName << endl;
+            cout << "Account Number: " << current->accountNumber << endl;
+            cout << "Balance: " << current->balance << endl;
+            return;  // Exit the function once the account is found and displayed
         }
 
-        cout << "Account not found" << endl;
-    }//tested
+        current = current->next;
+    }
+
+    cout << "Account not found" << endl;
+}//tested
 
 
 
@@ -256,46 +266,79 @@ void Bank::TransferMoney(unsigned short AccountNum1, unsigned short AccountNum, 
     return;
 }
 
-void Bank::Write_List_into_Files()
+void Bank::EncryptAndWriteToFile()
 {
+    AutoSeededRandomPool prng;
+    SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+    prng.GenerateBlock(key, key.size());
 
-    ofstream bank("Bank.txt");
+    SecByteBlock iv(AES::BLOCKSIZE);
+    prng.GenerateBlock(iv, iv.size());
+
+    CBC_Mode<AES>::Encryption encryptor(key, key.size(), iv);
+
+    ofstream file("BankEncrypted.txt", ios::binary);  // Qualified with std::
     AccountPointer ptr = head;
+
     while (ptr != NULL)
     {
-        bank << ptr->accounOwnerName << " " << ptr->accountNumber << " " << ptr->balance << " " << ptr->getPin() << endl;
+        string plaintext = ptr->accounOwnerName + " " + to_string(ptr->accountNumber) + " " +
+            to_string(ptr->balance) + " " + to_string(ptr->getPin()) + "\n";
+
+        StringSource s(plaintext, true,
+            new StreamTransformationFilter(encryptor,
+                new FileSink(file),
+                StreamTransformationFilter::NO_PADDING
+            )
+        );
         ptr = ptr->next;
-
     }
-    bank.close();
 
+    file.close();
 }
 
-void Bank::Read_File_into_List()
+// Decrypt the data after reading from the file
+void Bank::ReadFileAndDecrypt()
 {
+    AutoSeededRandomPool prng;
+    SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+    prng.GenerateBlock(key, key.size());
 
+    SecByteBlock iv(AES::BLOCKSIZE);
+    prng.GenerateBlock(iv, iv.size());
 
-    ifstream Bank("Bank.txt");
+    CBC_Mode<AES>::Decryption decryptor(key, key.size(), iv);
+
+    ifstream file("BankEncrypted.txt", ios::binary);  // Qualified with std::
     head = NULL;
     AccountPointer current = NULL;
-    string name, number, balance, pin;
-    while (Bank >> name >> number >> balance >> pin) {
-        Account* newNode = new Account;
-        newNode->accounOwnerName = name;
-        newNode->accountNumber = std::stoul(number);
-        newNode->balance = std::stod(balance);
-        int p = stoi(pin);
-        newNode->setPin(p);
-        // newNode->next = NULL;
-        if (head == NULL) {
-            head = newNode;
-            current = newNode;
-        }
-        else {
-            current->next = newNode;
-            current = newNode;
+    string ciphertext;
+    while (getline(file, ciphertext))
+    {
+        istringstream iss(ciphertext);
+        string name, number, balance, pin;
+
+        if (getline(iss, name, ' ') && getline(iss, number, ' ') &&
+            getline(iss, balance, ' ') && getline(iss, pin, ' '))
+        {
+            Account* newNode = new Account;
+            newNode->accounOwnerName = name;
+            newNode->accountNumber = stoul(number);
+            newNode->balance = stod(balance);
+            int p = stoi(pin);
+            newNode->setPin(p);
+
+            if (head == NULL)
+            {
+                head = newNode;
+                current = newNode;
+            }
+            else
+            {
+                current->next = newNode;
+                current = newNode;
+            }
         }
     }
-    Bank.close();
-}//tested
+}
 
