@@ -16,7 +16,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
     //Bank::Account acc;
     unsigned short choice2;
     double balance = 0;
-
+    unsigned short accN = bankk.findAccount(userName, pin);
 
     do
     {
@@ -34,7 +34,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
             cout << "Enter the amount: ";
             cin >> amount;
             //balance = acc.getBalance();
-            unsigned short accN = bankk.findAccount(userName, pin);
+            //unsigned short accN = bankk.findAccount(userName, pin);
             bankk.deposit(accN, amount);
             cout << "Updated data after the transaction:\n";
             bankk.BalanceDisplay(userName);
@@ -46,7 +46,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
             cout << "Enter the amount";
             cin >> amount;
             //balance = acc.getBalance();
-            unsigned short accN = bankk.findAccount(userName, pin);
+            //unsigned short accN = bankk.findAccount(userName, pin);
             bankk.withdraw(accN, amount);
             cout << "Updated data after the transaction:\n";
             bankk.BalanceDisplay(userName);
@@ -55,7 +55,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
         /*delete account*/
         else if (choice2 == 4) {
             //delete account   by using implemented functions 
-            unsigned short accN = bankk.findAccount(userName, pin);
+            //unsigned short accN = bankk.findAccount(userName, pin);
             bankk.deleteAccount(accN);
             if (bankk.findAccount(userName, pin) == 0)
                 cout << "Account deleted successfully";
@@ -70,7 +70,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
             cout << "Enter the Amount" << endl;
             double Amount;
             cin >> Amount;
-            unsigned short accN = bankk.findAccount(userName, pin);
+            //unsigned short accN = bankk.findAccount(userName, pin);
             bankk.TransferMoney(accN, num, Amount);
 
 
@@ -82,7 +82,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
     exit(0);
 
 }
-void AdminmainMenu(Admin &admin, string userName, int pin) {
+void AdminmainMenu(Admin &admin) {
     //Bank::Account acc;
     unsigned short choice2;
     double balance = 0;
@@ -90,17 +90,17 @@ void AdminmainMenu(Admin &admin, string userName, int pin) {
 
     do
     {
-        /*enters to bank main menu */
+        
         cout << "\nPress a number for transactions:\n(1)View Bank accounts\n(2)Search for Account\n (3)AddAccount\n (4)DeleteAccount\n(5)ViewTransactions\n(6)Quit\n";
         cin >> choice2;
 
-        /*view account details*/
-        if (choice2 == 1) {//done
+        
+        if (choice2 == 1) {
             admin.viewAccounts();
             cout << "*************************************************";
         }
-        /*deposit*/
-        else if (choice2 == 2) {//done
+      
+        else if (choice2 == 2) {
             unsigned short accN ;
             cout << "Enter the Account Number: ";
             cin >> accN;
@@ -108,7 +108,7 @@ void AdminmainMenu(Admin &admin, string userName, int pin) {
             cout << "*************************************************";
 
         }
-        /*withdraw*/
+
         else if (choice2 == 3) {
             cout << "Enter Account User Name" << endl;
             cin >> userName;
@@ -144,7 +144,7 @@ int main()
 
     //A varaiable = addaccount, as it returns the acc number!!!!>>>>
     Bank bank1;
-    Admin Ad;
+    Admin admin;
     Bank::Account acc;
 
     /*string s = "123.9";
@@ -165,7 +165,7 @@ int main()
     bank1.addAccount("Liam", 600000, 20041);
     bank1.addAccount("Zoe", 23000, 61400);*/
     //bank1.Write_List_into_Files();
-    bank1.Read_File_into_List();
+    
     
     int x;
     string AdminName;
@@ -174,6 +174,7 @@ int main()
     switch (x)
     {
     case 1:
+        admin.Read_File_into_List();
         cout << "Enter your name:\n";
         cin >> AdminName;
         // getline(cin,userName);
@@ -181,12 +182,13 @@ int main()
         cin >> pin;
         if (AdminName == "Ashraf" && pin==111)  {
             
-            AdminmainMenu(Ad, AdminName, pin);
+            AdminmainMenu(admin);
         }
         break;
 
 
     case 2 :
+        bank1.Read_File_into_List();
         cout << "Press\n (1)Sign in.\t(2)Sign up.\n";
         cin >> choice1;
 
