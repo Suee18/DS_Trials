@@ -1,20 +1,36 @@
+
 #include "Bank.h"
 #include <iostream>
 #include <cstdlib>
 #include <string>
 #include<fstream>
 #include <string>
-#include "cryptopp/aes.h"
-#include "cryptopp/modes.h"
-#include "cryptopp/filters.h"
-#include "cryptopp/files.h"
-#include "cryptopp/osrng.h"
-#include "cryptopp/hex.h"
+#include "aes.h"
+#include "modes.h"
+#include "filters.h"
+#include "files.h"
+#include "osrng.h"
+#include "hex.h"
 #include <sstream>
+#include "cryptlib.h"
+#include "rijndael.h"
+#include <sstream>
+#include <stdexcept>
 
 using namespace CryptoPP;
-
 using namespace std;
+
+
+Bank::Account::Account()
+{
+}
+
+Bank::Account::Account(const string& ownerName, unsigned short accNumber, double accBalance, int accPin)
+
+    : accounOwnerName(ownerName), accountNumber(accNumber), balance(accBalance), pin(accPin), next(nullptr)
+    {
+    }
+
 
 int Bank::Account::getPin()
 {
@@ -264,81 +280,107 @@ void Bank::TransferMoney(unsigned short AccountNum1, unsigned short AccountNum, 
     }
 
     return;
-}
-
-void Bank::EncryptAndWriteToFile()
+}void Bank::EncryptAndWriteToFile(AutoSeededRandomPool& prng)
 {
-    AutoSeededRandomPool prng;
-    SecByteBlock key(AES::DEFAULT_KEYLENGTH);
-    prng.GenerateBlock(key, key.size());
-
-    SecByteBlock iv(AES::BLOCKSIZE);
-    prng.GenerateBlock(iv, iv.size());
-
-    CBC_Mode<AES>::Encryption encryptor(key, key.size(), iv);
-
-    ofstream file("BankEncrypted.txt", ios::binary);  // Qualified with std::
-    AccountPointer ptr = head;
-
-    while (ptr != NULL)
+    try
     {
-        string plaintext = ptr->accounOwnerName + " " + to_string(ptr->accountNumber) + " " +
-            to_string(ptr->balance) + " " + to_string(ptr->getPin()) + "\n";
+        // Generate key and IV
+        SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+        prng.GenerateBlock(key, key.size());
 
-        StringSource s(plaintext, true,
-            new StreamTransformationFilter(encryptor,
-                new FileSink(file),
-                StreamTransformationFilter::NO_PADDING
-            )
-        );
-        ptr = ptr->next;
-    }
+        SecByteBlock iv(AES::BLOCKSIZE);
+        prng.GenerateBlock(iv, iv.size());
 
-    file.close();
-}
+        // Use the same key and iv for encryption and decryption
+        CBC_Mode<AES>::Encryption encryptor(key, key.size(), iv);
 
-// Decrypt the data after reading from the file
-void Bank::ReadFileAndDecrypt()
-{
-    AutoSeededRandomPool prng;
-    SecByteBlock key(AES::DEFAULT_KEYLENGTH);
-    prng.GenerateBlock(key, key.size());
-
-    SecByteBlock iv(AES::BLOCKSIZE);
-    prng.GenerateBlock(iv, iv.size());
-
-    CBC_Mode<AES>::Decryption decryptor(key, key.size(), iv);
-
-    ifstream file("BankEncrypted.txt", ios::binary);  // Qualified with std::
-    head = NULL;
-    AccountPointer current = NULL;
-    string ciphertext;
-    while (getline(file, ciphertext))
-    {
-        istringstream iss(ciphertext);
-        string name, number, balance, pin;
-
-        if (getline(iss, name, ' ') && getline(iss, number, ' ') &&
-            getline(iss, balance, ' ') && getline(iss, pin, ' '))
+        ofstream bankFile("BankEncrypted.txt", ios::binary);
+        if (!bankFile.is_open())
         {
-            Account* newNode = new Account;
-            newNode->accounOwnerName = name;
-            newNode->accountNumber = stoul(number);
-            newNode->balance = stod(balance);
-            int p = stoi(pin);
-            newNode->setPin(p);
-
-            if (head == NULL)
-            {
-                head = newNode;
-                current = newNode;
-            }
-            else
-            {
-                current->next = newNode;
-                current = newNode;
-            }
+            cerr << "Error opening file for writing." << endl;
+            return;
         }
+
+        AccountPointer ptr = head;
+
+        while (ptr != NULL)
+        {
+            // Serialize the data to a string
+            string plaintext = ptr->accounOwnerName + " " + to_string(ptr->accountNumber) + " " +
+                to_string(ptr->balance) + " " + to_string(ptr->getPin());
+
+            // Encrypt the plaintext
+            StringSource s(plaintext, true,
+                new StreamTransformationFilter(encryptor,
+                    new FileSink(bankFile)
+                )
+            );
+
+            ptr = ptr->next;
+        }
+
+        bankFile.close();
+    }
+    catch (const std::exception& ex)
+    {
+        cerr << "Exception during file writing: " << ex.what() << endl;
+        // Handle the exception as needed
+    }
+}
+
+
+
+void Bank::DecryptFromFile(AutoSeededRandomPool& prng)
+{
+    try
+    {
+        // Generate key and IV
+        SecByteBlock key(AES::DEFAULT_KEYLENGTH);
+        prng.GenerateBlock(key, key.size());
+
+        SecByteBlock iv(AES::BLOCKSIZE);
+        prng.GenerateBlock(iv, iv.size());
+
+        // Use the same key and iv for encryption and decryption
+        CBC_Mode<AES>::Decryption decryptor(key, key.size(), iv);
+
+        ifstream bankFile("BankEncrypted.txt", ios::binary);
+        if (!bankFile.is_open())
+        {
+            throw runtime_error("Error opening file for reading.");
+        }
+
+        string ciphertext;
+        while (getline(bankFile, ciphertext))
+        {
+            // Decrypt the ciphertext
+            string plaintext;
+            StringSource s(ciphertext, true,
+                new StreamTransformationFilter(decryptor,
+                    new StringSink(plaintext)
+                )
+            );
+
+            // Deserialize the data from the plaintext
+            stringstream ss(plaintext);
+            string ownerName;
+            int accountNumber;
+            double balance;
+            int pin;
+            ss >> ownerName >> accountNumber >> balance >> pin;
+
+            // Store the deserialized data in a linked list
+            AccountPointer newPtr = new Account(ownerName, accountNumber, balance, pin);
+            newPtr->next = head;
+            head = newPtr;
+        }
+
+        bankFile.close();
+    }
+    catch (const exception& ex)
+    {
+        cerr << "Exception during file reading: " << ex.what() << endl;
+        // Handle the exception as needed
     }
 }
 
