@@ -91,7 +91,7 @@ void Bank::addAccount(string accounOwnerName, double balance, int pin)
         return;
     }
 
-
+// Iteration to put the acc at the end of list
     while (ptr->next != NULL)
     {
         ptr = ptr->next;
@@ -118,7 +118,7 @@ bool Bank::AccNumSearch(unsigned short accountNumber)
     return false;
 }
 
-
+// checking if data entered is available
 bool Bank::loginVerify(Bank* bank, string accounOwnerName, int pin)
 {
     AccountPointer currentPtr = bank->head;
@@ -244,7 +244,7 @@ void Bank::BalanceDisplay(const string& account_holder_name)
 }//tested
 
 
-
+// Transfering money from an acc to another
 void Bank::TransferMoney(unsigned short AccountNum1, unsigned short AccountNum, double Amount)
 {
     AccountPointer ptr = head, ptr1 = head;
