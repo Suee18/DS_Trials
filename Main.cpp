@@ -137,8 +137,7 @@ void AdminmainMenu(Admin &admin) {
     exit(0);
 
 }
-//enum UserType { Admin, Customer };
-//MAIN STARTS HERER
+//MAIN STARTS HERE
 int main()
 {
 
@@ -151,7 +150,7 @@ int main()
     double num = stod(s);
     cout << num;
    */
-    unsigned short choice1, choice2 = 0, count = 0, count2 = 0;
+    unsigned short choice1 = 0, choice2 = 0, count = 0, count2 = 0;
     int pin, pin2;
     double amount;
     string userName;
