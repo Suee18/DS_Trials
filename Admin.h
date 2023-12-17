@@ -6,8 +6,6 @@ class Admin:public Bank
 	Admin();
 	void viewAccounts();
 	void SearchAccount(unsigned short accountNumber);
-	//void ViewTransactions();
-
-
+	void ViewTransactions();
 };
 
