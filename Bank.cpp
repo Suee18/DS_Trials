@@ -1,4 +1,5 @@
 #include "Bank.h"
+#include "Transactions.h"
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -33,6 +34,7 @@ void Bank::addAccount(string accounOwnerName, double balance, int pin)
     // Generate a new random number (to avoid repetition)
     while (AccNumSearch(accnum))
     {
+        //serial number string vi
         accnum = rand() % (65535 - 10000 - 1) + 10000;
     }
 
@@ -140,10 +142,13 @@ void Bank::deposit(int accountNum, double amount) {
     while (current != NULL) {
         if (current->accountNumber == accountNum) {
             current->balance += amount;
+            Transactions transaction(accountNum, amount, "Deposit");
+            transaction.writeToFile();
             return;
         }
         current = current->next;
     }
+
 }//tested 
 
 //deduct money from balance
@@ -157,13 +162,15 @@ void Bank::withdraw(int accountNum, double amount) {
             else {
                 cout << "Insufficient balance" << endl;
             }
+            Transactions transaction(accountNum, amount, "Withdrawal");
+            transaction.writeToFile();
             return;
         }
         current = current->next;
     }
 }//tested
 
-unsigned short Bank::findAccount(const string& username, int pin) {
+unsigned short Bank::findAccount(const string username, int pin) {
     AccountPointer current = head;
     while (current != nullptr) {
         if (current->accounOwnerName == username && current->getPin() == pin) {
@@ -174,7 +181,7 @@ unsigned short Bank::findAccount(const string& username, int pin) {
     return 0;  // Return 0 if account is not found (assuming 0 is not a valid account number)
 }
 
-void Bank::BalanceDisplay(const string& account_holder_name)
+void Bank::BalanceDisplay(const string account_holder_name)//edit:remove &
 {
     AccountPointer current = head;
 
@@ -213,7 +220,11 @@ void Bank::TransferMoney(unsigned short AccountNum1, unsigned short AccountNum, 
             if (Amount <= balance1)
             {
                 withdraw(AccountNum1, Amount);
+                /*Transactions transaction(AccountNum1, Amount, "Withdrawal");
+                transaction.writeToFile();*/
                 deposit(AccountNum, Amount);
+                /*Transactions transaction1(AccountNum, Amount, "Withdrawal");
+                transaction.writeToFile();*/
                 //ptr->accountNumber += Amount;
                 //acc->accountNumber -= Amount;
                 cout << "Money Transfered Successfully" << endl;
@@ -231,7 +242,7 @@ void Bank::TransferMoney(unsigned short AccountNum1, unsigned short AccountNum, 
 
 }
 
-void Bank::Write_List_into_Files() {
+   void Bank::Write_List_into_Files() {
     ofstream bank("Bank.txt");
     AccountPointer ptr = head;
 
@@ -268,6 +279,46 @@ void Bank::Read_File_into_List() {
         }
     }
     Bank.close();
-}//tested
+}
+
+int Bank::encryptPin(int pin)
+{
+    
+        // Example: Add 1 to each digit
+        int encryptedPin = 0;
+        int multiplier = 1;
+
+        while (pin > 0) {
+            int digit = pin % 10;
+            digit = (digit + 1) % 10; // Add 1 and wrap around if needed
+            encryptedPin += digit * multiplier;
+            multiplier *= 10;
+            pin /= 10;
+        }
+
+        return encryptedPin;
+    
+}
+
+int Bank::decryptPin(int encryptedPin)
+{
+    // Example: Subtract 1 from each digit
+    int decryptedPin = 0;
+    int multiplier = 1;
+
+    while (encryptedPin > 0) {
+        int digit = encryptedPin % 10;
+        digit = (digit + 9) % 10; // Subtract 1 and wrap around if needed
+        decryptedPin += digit * multiplier;
+        multiplier *= 10;
+        encryptedPin /= 10;
+    }
+
+    return decryptedPin;
+}
+
+
+
+
 
 
