@@ -14,7 +14,7 @@ Admin::Admin() {
 void Admin::viewAccounts()
 {
 	AccountPointer ptr=head;
-	while (ptr != NULL) {
+	while (ptr != nullptr) {
 
 		cout << "Account Username =" << ptr->accounOwnerName << endl;
 		cout << "Account number =" << ptr->accountNumber << endl;
@@ -27,17 +27,24 @@ void Admin::viewAccounts()
 void Admin::SearchAccount(unsigned short accountNumber)
 {
 	AccountPointer ptr = head;
-	while (ptr != NULL) {
+	while (ptr != nullptr) {
 		if (ptr->accountNumber == accountNumber) {
 			cout << "Account Username =" << ptr->accounOwnerName << endl;
 			cout << "Balance = " << ptr->balance << endl;
-			ptr = ptr->next;
-
+			
+			return;
 		}
+          ptr = ptr->next;
 	}
 }
 
-//void Admin::ViewTransactions()
-//{
-
-//}
+void Admin::ViewTransactions()
+{
+	string t;
+	ifstream Transactions("transactions.txt");
+	while (!Transactions.eof()) {
+		getline(Transactions, t,'*');
+		cout << t;
+	}
+	return;
+}
