@@ -1,0 +1,8 @@
+Account Number: 28467, Type: Deposit, Amount: 1000, Date: Mon Dec 11 20:46:09 2023
+*
+Account Number: 28467, Type: Deposit, Amount: 1000, Date: Mon Dec 11 20:47:58 2023
+*
+Account Number: 28467, Type: Withdrawal, Amount: 670, Date: Mon Dec 11 20:52:07 2023
+*
+Account Number: 10041, Type: Deposit, Amount: 670, Date: Mon Dec 11 20:52:07 2023
+*
