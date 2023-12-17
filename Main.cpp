@@ -75,7 +75,7 @@ void mainMenu(Bank& bankk, string userName, int pin) {
 
 
         }
-        else  cerr << "Invalid Input";
+        else  cerr << "Exiting...";
 
     } while (choice2 != 6);
     bankk.Write_List_into_Files();
@@ -127,17 +127,18 @@ void AdminmainMenu(Admin &admin) {
             admin.deleteAccount(accN);
         }
         else if (choice2 == 5) {
-
-            cout << "Under Construction" << endl;
+            admin.ViewTransactions();
+            //cout << "Under Construction" << endl;
         }
-        else  cerr << "Invalid Input";
+        else  cerr << "Exiting...";
 
     } while (choice2 != 6);
     admin.Write_List_into_Files();
     exit(0);
 
 }
-//MAIN STARTS HERE
+//enum UserType { Admin, Customer };
+//MAIN STARTS HERER
 int main()
 {
 
@@ -150,7 +151,7 @@ int main()
     double num = stod(s);
     cout << num;
    */
-    unsigned short choice1 = 0, choice2 = 0, count = 0, count2 = 0;
+    unsigned short choice1, choice2 = 0, count = 0, count2 = 0;
     int pin, pin2;
     double amount;
     string userName;
@@ -212,7 +213,7 @@ int main()
                 if (bank1.loginVerify(&bank1, userName, pinn) == true)
                 {
                     mainMenu(bank1, userName, pin);
-
+                    //to_string
                 }
                 else
                     cerr << "Invalid username or password. Try again\n"; /*5 times*/
