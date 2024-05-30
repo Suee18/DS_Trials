@@ -13,13 +13,13 @@
 > 
 > ### Features:
 >
-> -log in - sign up system
+> - log in - sign up system
 > 
-> -Admin side
+> - Admin side
 > 
-> -Customer side
+> - Customer side
 > 
-> -Transactions
+> - Transactions
 
 
 ## 📨 Contact us
