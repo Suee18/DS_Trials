@@ -1,15 +1,29 @@
-before you get started and notes
->>>capitalize any variable/ naming starting from the second word [[userName, logInVerification]]
->>>count is the linked list size
+#Banking System
 
-**needs to be enhanced:
-1) create a node pointer (account pointer data type as in labs)[[ typedef Node* NodePointer; NodePointer head; NodePointer currentPtr;]] //Done
-2) getline in main for the userName string (3ashan law user dakhal full name account already created with more than one name
-3) data into files not instances//Done
+> [!NOTE]
+> 
+> Terminal-based project for a banking system using  __linked lists__ as the data structure. Confidential user data is encrypted using Crypto++ library.
+> 
+> The project's main target is to manipulate data through the most optimum data structure, without any leaks and with proper security and accuracy.
+> 
+> ###Implementation:
+> 
+> Backend: `cpp` `crypto++`
+> ### Features:
+> -log in - sign up system
+> -Admin side
+> -Customer side
+> -Transactions
 
-**Still missing
-1) sign up redirecting
-2) destructing call//Done
-   
 
-  
+## 📨 Contact us
+
+Feel free to [send me an e-mail](mailto:salmaaasherif22@gmail.com?subject=GitHub%3A%20DS%20Banking%20system%20project)
+
+
+### 👩🏼‍💻🧑🏻‍💻Contributors: 
+-  [@Suee18](https://github.com/Suee18)
+-  [@ou4y](https://github.com/Ou4y)
+-  [@Mohamd El Srougy](https://github.com/mohamedelsrougy)
+-  [@Habiba Darwish]()
+-  [@Layla]
